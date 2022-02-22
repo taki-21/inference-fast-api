@@ -1,10 +1,11 @@
+from typing import Optional
 from fastapi import FastAPI
 
 app = FastAPI()
 
-@app.get('/countries/{country_name}')
-async def country(country_name: str = 'japan', city_name: str = 'tokyo'):
+@app.get('/countries/')
+async def country(country_name: Optional[str] = None, country_no: Optional[int] = None):
     return {
         'country_name': country_name,
-        'city_name': city_name,
+        'country_no': country_no,
     }
