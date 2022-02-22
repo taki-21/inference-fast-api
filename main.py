@@ -2,9 +2,9 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
-@app.get('/countries/')
-async def country(country_name: str = 'japan', country_no: int = 1):
+@app.get('/countries/{country_name}')
+async def country(country_name: str = 'japan', city_name: str = 'tokyo'):
     return {
         'country_name': country_name,
-        'country_no': country_no,
+        'city_name': city_name,
     }
