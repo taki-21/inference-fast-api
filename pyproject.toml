@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "inference-fast-api"
+version = "0.1.0"
+description = ""
+authors = ["taki-21 <taki.it.0208.21@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+fastapi = "^0.74.0"
+uvicorn = "^0.17.5"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
