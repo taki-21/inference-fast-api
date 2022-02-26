@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   api:
     container_name: inference-demo-api
@@ -7,3 +7,11 @@ services:
       dockerfile: ./api/Dockerfile
       environment:
         AWS_S3_ENDPOINT: ${AWS_S3_ENDPOINT}
+        AWS_SQS_ENDPOINT: ${AWS_SQS_ENDPOINT}
+        BUCKET_NAME: ${BUCKET_NAME}
+        QUEUE_NAME: ${QUEUE_NAME}
+        MESSAGE_GROUP_ID: ${MESSAGE_GROUP_ID}
+        DEADLETTER_QUEUE_NAME: ${DEADLETTER_QUEUE_NAME}
+        ACCOUNT_ID: ${ACCOUNT_ID}
+        AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+      volumes:
