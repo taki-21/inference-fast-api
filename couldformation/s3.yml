@@ -1,0 +1,18 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: ---
+
+Mappings:
+  BucketNameMappings:
+    # AWS Account ID for development
+      BucketName: inference-fast-api
+
+Resources:
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !FindInMap [BucketNameMappings, !Ref "AWS::AccountId", BucketName]
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: "CmBillingGroup"
+          Value: "inference-fast-api"
