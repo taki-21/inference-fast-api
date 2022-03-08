@@ -1,0 +1,67 @@
+Mappings:
+  BucketMappings:
+      BucketName: inference-api
+
+
+Resources:
+  BeanstalkForInferenceApi:
+    Type: AWS::ElasticBeanstalk::Application
+    Properties:
+      ApplicationName: Inference Api
+      Description: Application for Inference Api Worker
+
+  SecurityGroupForInferenceApiWorkerEB:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: String
+      GroupName: inference-api-sg
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          CidrIp: 0.0.0.0/0
+          FromPort: 22
+          ToPort: 22
+
+  InstanceRoleForInferenceApiWorkerEB:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: eb-ec2-role-for-inference-api-worker
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSElasticBeanstalkWorkerTier
+        - arn:aws:iam::aws:policy/SecretsManagerReadWrite
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Description: IAM Role for Inference Api Worker
+
+  PoliciesForInferenceApiWorkerEB:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: policy-for-inference-api-worker
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+            - "s3:*"
+          Resource:
+            - !Join [ "", [ 'arn:aws:s3:::', !FindInMap [BucketMappings, !Ref "AWS::AccountId", BucketName], '/*' ] ]
+            - !Join [ "", [ 'arn:aws:s3:::', !FindInMap [BucketMappings, !Ref "AWS::AccountId", BucketName] ] ]
+      Roles:
+        - !Ref InstanceRoleForInferenceApiWorkerEB
+
+  InstanceProfileForInferenceApiWorkerEB:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: eb-ec2-role-for-inference-api-worker
+      Path: /
+      Roles:
+        - !Ref InstanceRoleForInferenceApiWorkerEB
