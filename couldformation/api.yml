@@ -6,8 +6,6 @@ Parameters:
 
 Mappings:
 
-Conditions:
-
 Resources:
   Certificate:
     Type:
