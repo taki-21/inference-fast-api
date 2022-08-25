@@ -1,14 +1,18 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description:
-Metadata:
-
-Parameters:
 
 Mappings:
+  DomainMappings:
+    "XXX": # 開発環境
+      AppDomainName: dev.sample-detection.api.tk.com
+    "YYY": # 本番環境
+      AppDomainName: sample-detection.api.tk.com
 
 Resources:
   Certificate:
-    Type:
+    Type: AWS::CertificateManager::Certificate
     Properties:
-
-Outputs:
+      DomainName: !FindInMap [DomainMappings, !Ref "AWS::AccountId", AppDomainName]
+      ValidationMethod: DNS
+      Tags:
+        - Key: "CmBillingGroup"
+          Value: "sample-detection-api"
