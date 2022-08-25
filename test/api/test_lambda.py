@@ -1,4 +1,4 @@
-from functions.text_detection import execute, lambda_handler
+from functions.sample_detection import execute, lambda_handler
 from lib.s3_client import S3Client
 from lib.sqs_client import SqsClient
 from schemas.api_response import ApiResponse, ApiResponseError

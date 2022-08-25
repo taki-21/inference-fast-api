@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   api:
-    container_name: text-detection-api
+    container_name: sample-detection-api
     build:
       context: .
       dockerfile: ./api/Dockerfile
@@ -31,7 +31,7 @@ services:
       - "3333:3333"
     tty: true
   analysis-worker:
-    container_name: text-detection-worker
+    container_name: sample-detection-worker
     build:
       context: .
       dockerfile: ./worker/Dockerfile.dev
