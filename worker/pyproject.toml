@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "drawing-type-classification-worker"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+fastapi = "^0.68.0"
+uvicorn = "^0.14.0"
+boto3 = "^1.17.34"
+loguru = "^0.5.3"
+requests = "^2.26.0"
+sampledetection = {git = "ssh://git@github.com/taki-21/dsample-detection.git", rev = "package"}
+
+[tool.poetry.dev-dependencies]
+awsebcli = "^3.19.4"
+pytest = "^6.2.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
