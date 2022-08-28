@@ -1,0 +1,32 @@
+option_settings:
+
+  aws:elasticbeanstalk:command:
+    Timeout: '600'
+
+  aws:elasticbeanstalk:environment:
+    ServiceRole: aws-elasticbeanstalk-service-role
+
+  aws:elasticbeanstalk:sqsd:
+    HttpPath: /sqs_receiver
+    WorkerQueueURL: https://sqs.ap-northeast-1.amazonaws.com/<%AccountId%>/sqs-for-sample-detection.fifo
+
+  aws:autoscaling:launchconfiguration:
+    EC2KeyName: dev-aoz-cloud
+    SecurityGroups:
+      - sample-detection-sg
+    RootVolumeType: gp2
+    RootVolumeSize: "50"
+
+  aws:ec2:instances:
+    InstanceTypes: m5.large
+
+  aws:autoscaling:asg:
+    MinSize: 1
+    MaxSize: 4
+
+  aws:elasticbeanstalk:cloudwatch:logs:
+    StreamLogs: true
+
+  aws:elasticbeanstalk:application:environment:
+    BUCKET_NAME: <%BucketName%>
+    QUEUE_NAME: sqs-for-sample-detection.fifo
