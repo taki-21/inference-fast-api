@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  worker:
+    container_name: sample-detection-worker
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        DEPLOY_KEY: ${DEPLOY_KEY}
+    environment:
+        BUCKET_NAME: ${BUCKET_NAME}
+        QUEUE_NAME: ${QUEUE_NAME}
+    env_file:
+      - .env
+    ports:
+      - "80:8080"
+    tty: true
+    volumes:
+      - /var/app/weights:/code/weights
