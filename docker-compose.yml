@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   api:
-    container_name: sample-detection-api
+    container_name: ${SERVICE_API_NAME}
     build:
       context: .
       dockerfile: ./api/Dockerfile
@@ -10,6 +10,11 @@ services:
         CLI_AWS_SECRET_ACCESS_KEY: ${CLI_AWS_SECRET_ACCESS_KEY}
         AWS_ROLE_ARN: ${AWS_ROLE_ARN}
     environment:
+      SERVICE_NAME: ${SERVICE_NAME}
+      SERVICE_NAME_Underscore: ${SERVICE_NAME_Underscore}
+      SERVICE_API_NAME: ${SERVICE_API_NAME}
+      SERVICE_WORKER_NAME: ${SERVICE_WORKER_NAME}
+      API_MODEL_NAME: ${API_MODEL_NAME}
       AWS_S3_ENDPOINT: ${AWS_S3_ENDPOINT}
       AWS_SQS_ENDPOINT: ${AWS_SQS_ENDPOINT}
       BUCKET_NAME: ${BUCKET_NAME}
@@ -18,8 +23,6 @@ services:
       DEADLETTER_QUEUE_NAME: ${DEADLETTER_QUEUE_NAME}
       ACCOUNT_ID: ${ACCOUNT_ID}
       AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
-      # API_KEY: ${API_KEY}
-      # API_DOMAIN: ${API_DOMAIN}
     volumes:
       - ./api/:/code
       - ./lib/:/code/lib
@@ -31,7 +34,7 @@ services:
       - "3333:3333"
     tty: true
   analysis-worker:
-    container_name: sample-detection-worker
+    container_name: ${SERVICE_WORKER_NAME}
     build:
       context: .
       dockerfile: ./worker/Dockerfile.dev
@@ -58,10 +61,12 @@ services:
       - ${PIP_CACHE_DIR_WORKER:-cache-worker}:/root/.cache
   fake-s3:
     image: lphoward/fake-s3
+    container_name: ${SERVICE_NAME}-fake-s3
     ports:
       - 4569:4569
   fake-sqs:
     image: evalphobia/fake_sqs:1.0.2
+    container_name: ${SERVICE_NAME}-fake-sqs
     command: |
       /bin/sh -c 'fake_sqs -d --pid /var/run/fake_sqs.pid && \
       /usr/local/bin/go-sqs-create ${QUEUE_NAME} test_queue && \
@@ -73,6 +78,7 @@ services:
       AWS_SQS_ENDPOINT: http://localhost:4568
   sqs-d:
     image: fterrag/simple-sqsd:latest
+    container_name: ${SERVICE_NAME}-sqs-d
     environment:
       AWS_ACCESS_KEY_ID: ${CLI_AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${CLI_AWS_SECRET_ACCESS_KEY}
@@ -87,12 +93,14 @@ services:
       - analysis-worker
   echo-server:
     image: mendhak/http-https-echo:17
+    container_name: ${SERVICE_NAME}-echo-server
     environment:
       - HTTP_PORT=80
     ports:
       - 3000:80
 
+
 volumes:
-  cache-worker:
   cache-api:
   node-modules:
+  cache-worker:
