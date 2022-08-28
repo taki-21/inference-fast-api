@@ -1,0 +1,10 @@
+branch-defaults:
+  default:
+    environment: sample-detection
+    group_suffix: null
+global:
+  application_name: Sample Detection
+  default_platform: Docker running on 64bit Amazon Linux 2
+  default_region: ap-northeast-1
+  profile: default
+  workspace_type: Application
