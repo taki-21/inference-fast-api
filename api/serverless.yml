@@ -1,0 +1,131 @@
+service: ${env:SERVICE_API_NAME}
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: python3.8
+  stage: ${opt:stage, self:custom.defaultStage}
+  lambdaHashingVersion: 20201221
+  apiGateway:
+    apiKeys:
+      - name: ${env:SERVICE_API_NAME}-key
+    apiKeySourceType: HEADER
+  logs:
+    restApi: true
+  environment:
+    BUCKET_NAME: ${self:custom.environment.${self:provider.stage}.BUCKET_NAME}
+    QUEUE_NAME: ${self:custom.environment.${self:provider.stage}.QUEUE_NAME}
+  region: ${env:AWS_DEFAULT_REGION}
+  stackTags:
+    CmBillingGroup: ${env:SERVICE_API_NAME}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:*"
+        - "sqs:*"
+      Resource:
+        - Fn::Join:
+            - ""
+            - - "arn:aws:s3:::"
+              - ${self:custom.environment.${self:provider.stage}.BUCKET_NAME}
+              - "/*"
+        - Fn::Join:
+            - ""
+            - - "arn:aws:sqs:"
+              - ${env:AWS_DEFAULT_REGION}
+              - ":"
+              - ${env:ACCOUNT_ID}
+              - ":"
+              - ${self:custom.environment.${self:provider.stage}.QUEUE_NAME}
+functions:
+  func:
+    name: ${env:SERVICE_NAME}
+    handler: functions/${env:SERVICE_NAME_Underscore}.lambda_handler
+    events:
+      - http:
+          path: /${env:SERVICE_NAME}
+          method: post
+          private: true
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: ${env:SERVICE_NAME}
+            description: ${env:SERVICE_NAME}
+            requestModels:
+              "application/json": ${env:API_MODEL_NAME}
+resources:
+  Resources:
+    Queue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.environment.${self:provider.stage}.QUEUE_NAME}
+        ContentBasedDeduplication: true
+        FifoQueue: true
+        MessageRetentionPeriod: 1209600 # メッセージ保持期間[s]
+        ReceiveMessageWaitTimeSeconds: 20 # メッセージ受信待機期間（キューのポーリング間隔）[s]
+        VisibilityTimeout: 1200 # 可視性タイムアウト
+        RedrivePolicy:
+          deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
+          maxReceiveCount: 3
+        Tags:
+          - Key: purpose
+            Value: ${env:SERVICE_API_NAME}
+    DeadLetterQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.environment.${self:provider.stage}.DEADLETTER_QUEUE_NAME}
+        ContentBasedDeduplication: true
+        FifoQueue: true
+        MessageRetentionPeriod: 1209600
+        ReceiveMessageWaitTimeSeconds: 20
+        VisibilityTimeout: 1200
+        Tags:
+          - Key: purpose
+            Value: ${env:SERVICE_API_NAME}
+    RequestBodyValidator:
+      Type: AWS::ApiGateway::RequestValidator
+      Properties:
+        Name: "only-body"
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ValidateRequestBody: true
+        ValidateRequestParameters: false
+custom:
+  defaultStage: dev
+  environment:
+    dev: ${file(./env/dev.yml)}
+    prod: ${file(./env/prod.yml)}
+  pythonRequirements:
+    dockerizePip: false
+  documentation:
+    api:
+      info:
+        version: "0.1"
+        title: ${env:SERVICE_NAME}
+        description: ${env:SERVICE_NAME}
+    models:
+      - name: ${env:API_MODEL_NAME}
+        contentType: "application/json"
+        schema: ${file(schemas/api_model.json)}
+  customDomain:
+    domainName: ${self:custom.environment.${self:provider.stage}.API_DOMAIN}
+    certificateName: ${self:custom.environment.${self:provider.stage}.API_DOMAIN}
+    basePath: ""
+    createRoute53Record: false
+    endpointType: regional
+
+package:
+  exclude:
+    - .git/**
+    - node_modules/**
+    - __pycache__/**
+    - .env
+    - .pytest_cache/**
+    - .DS_Store
+    - .serverless/**
+
+plugins:
+  - serverless-offline
+  - serverless-python-requirements
+  - serverless-reqvalidator-plugin
+  - serverless-aws-documentation
+  - serverless-domain-manager
