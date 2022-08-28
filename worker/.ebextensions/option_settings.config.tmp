@@ -11,7 +11,7 @@ option_settings:
     WorkerQueueURL: https://sqs.ap-northeast-1.amazonaws.com/<%AccountId%>/sqs-for-sample-detection.fifo
 
   aws:autoscaling:launchconfiguration:
-    EC2KeyName: dev-aoz-cloud
+    EC2KeyName: sample-cloud
     SecurityGroups:
       - sample-detection-sg
     RootVolumeType: gp2
