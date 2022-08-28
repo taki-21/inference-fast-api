@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "drawing-type-classification-worker"
+name = "sample-detection-worker"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
